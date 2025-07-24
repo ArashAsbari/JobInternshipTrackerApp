@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from storage import save_jobs, load_jobs
 
 
 class JobTrackerApp(tk.Tk):
@@ -9,7 +10,7 @@ class JobTrackerApp(tk.Tk):
         self.geometry("800x500")
         self.configure(bg="#f2f2f2")
 
-        self.jobs = []  # In-memory job list
+        self.jobs = load_jobs()  # Load persisted job entries
         self.create_widgets()
 
     def create_widgets(self):
@@ -24,6 +25,7 @@ class JobTrackerApp(tk.Tk):
 
         self.create_add_tab()
         self.create_view_tab()
+        self.update_job_list()  # Show loaded jobs immediately
 
     def create_add_tab(self):
         labels = ["Company", "Role", "Status", "Date Applied", "Location", "Notes"]
@@ -58,6 +60,7 @@ class JobTrackerApp(tk.Tk):
             "notes": self.entries["notes"].get("1.0", tk.END).strip()
         }
         self.jobs.append(job)
+        save_jobs(self.jobs)  # Save to JSON file
         self.update_job_list()
 
         for key, widget in self.entries.items():
