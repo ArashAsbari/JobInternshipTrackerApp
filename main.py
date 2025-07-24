@@ -28,20 +28,23 @@ class JobTrackerApp(tk.Tk):
         self.create_view_tab()
 
     def create_add_tab(self):
-        # Input Fields
-        tk.Label(self.add_tab, text="Company:").grid(row=0, column=0, padx=10, pady=5, sticky='e')
-        self.company_entry = tk.Entry(self.add_tab)
-        self.company_entry.grid(row=0, column=1, padx=10, pady=5)
+        labels = ["Company", "Role", "Status", "Date Applied", "Location", "Notes"]
+        self.entries = {}
 
-        tk.Label(self.add_tab, text="Role:").grid(row=1, column=0, padx=10, pady=5, sticky='e')
-        self.role_entry = tk.Entry(self.add_tab)
-        self.role_entry.grid(row=1, column=1, padx=10, pady=5)
+        for i, label in enumerate(labels):
+            tk.Label(self.add_tab, text=f"{label}:").grid(row=i, column=0, padx=10, pady=5, sticky='e')
 
-        tk.Label(self.add_tab, text="Status:").grid(row=2, column=0, padx=10, pady=5, sticky='e')
-        self.status_entry = tk.Entry(self.add_tab)
-        self.status_entry.grid(row=2, column=1, padx=10, pady=5)
+            if label == "Notes":
+                text = tk.Text(self.add_tab, height=4, width=40)
+                text.grid(row=i, column=1, padx=10, pady=5)
+                self.entries[label.lower()] = text
+            else:
+                entry = tk.Entry(self.add_tab, width=40)
+                entry.grid(row=i, column=1, padx=10, pady=5)
+                self.entries[label.lower()] = entry
 
-        tk.Button(self.add_tab, text="Add Job", command=self.add_job).grid(row=3, column=0, columnspan=2, pady=10)
+        tk.Button(self.add_tab, text="Add Job", command=self.add_job).grid(row=len(labels), column=0, columnspan=2,
+                                                                           pady=10)
 
     def create_view_tab(self):
         self.job_listbox = tk.Listbox(self.view_tab)
@@ -49,17 +52,22 @@ class JobTrackerApp(tk.Tk):
 
     def add_job(self):
         job = {
-            "company": self.company_entry.get(),
-            "role": self.role_entry.get(),
-            "status": self.status_entry.get()
+            "company": self.entries["company"].get(),
+            "role": self.entries["role"].get(),
+            "status": self.entries["status"].get(),
+            "date applied": self.entries["date applied"].get(),
+            "location": self.entries["location"].get(),
+            "notes": self.entries["notes"].get("1.0", tk.END).strip()
         }
         self.jobs.append(job)
         self.update_job_list()
 
-        # Clear fields
-        self.company_entry.delete(0, tk.END)
-        self.role_entry.delete(0, tk.END)
-        self.status_entry.delete(0, tk.END)
+        # Clear fields after adding
+        for key, widget in self.entries.items():
+            if key == "notes":
+                widget.delete("1.0", tk.END)
+            else:
+                widget.delete(0, tk.END)
 
     def update_job_list(self):
         self.job_listbox.delete(0, tk.END)
